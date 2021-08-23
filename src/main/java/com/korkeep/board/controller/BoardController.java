@@ -4,7 +4,6 @@ import com.korkeep.board.dto.BoardDto;
 import com.korkeep.board.dto.FileDto;
 import com.korkeep.board.service.BoardService;
 import com.korkeep.board.service.FileService;
-import com.korkeep.board.util.MD5Generator;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -47,9 +46,8 @@ public class BoardController {
     @PostMapping("/post")
     public String write(@RequestParam("file") MultipartFile files, BoardDto boardDto) {
         try {
-            String origFilename = files.getOriginalFilename();
-            assert origFilename != null;
-            String filename = new MD5Generator(origFilename).toString();
+            String filename = files.getOriginalFilename();
+            assert filename != null;
             String savePath = System.getProperty("user.dir") + "\\files";
 
             if (!new File(savePath).exists()) {
@@ -65,7 +63,6 @@ public class BoardController {
             files.transferTo(new File(filePath));
 
             FileDto fileDto = new FileDto();
-            fileDto.setOrigFileName(origFilename);
             fileDto.setFileName(filename);
             fileDto.setFilePath(filePath);
 
@@ -112,7 +109,7 @@ public class BoardController {
         Resource resource = new InputStreamResource(Files.newInputStream(path));
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDto.getOrigFileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDto.getFileName() + "\"")
                 .body(resource);
     }
 }
